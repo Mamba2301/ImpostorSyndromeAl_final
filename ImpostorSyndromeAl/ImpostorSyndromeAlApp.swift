@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct ImpostorSyndromeAlApp: App {
+    @State private var currentDate: Date = Date()  
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .accentColor(Color("AccentColor"))
         }
     }
 }
