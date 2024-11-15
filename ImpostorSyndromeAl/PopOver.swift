@@ -8,13 +8,12 @@ import SwiftUI
 
 // PopOverView
 struct PopOverView: View {
-    @Binding var showPopover: Bool
-    @Binding var input: String
-    @Binding var navigateToMainView: Bool
-    
-    
     @State private var rotateImage = false
     
+    @Binding var input: String
+    @Binding var arrayInput: [String]
+    @Binding var showPopover: Bool
+    @Binding var navigateToMainView: Bool
     
     private var formattedDate: String {
         let formatter = DateFormatter()
@@ -54,7 +53,7 @@ struct PopOverView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 250, height: 250)
-                    .padding(.top, 10)
+                    .padding(.top, -8)
                     .rotationEffect(.degrees(rotateImage ? -15 : 15))
                     .offset(x: rotateImage ? 20 : -20)
                     .animation(
@@ -92,9 +91,15 @@ struct PopOverView: View {
                 
                 Spacer()
                 
-                Button("Reframe") {
-                    showPopover.toggle()
-                    navigateToMainView = true
+                Button(action: {
+                    if !input.isEmpty {
+                        arrayInput.append(input)
+                        input = ""
+                        showPopover.toggle()
+                        navigateToMainView = true
+                    }
+                }) {
+                    Text("Reframe")
                 }
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
@@ -103,6 +108,12 @@ struct PopOverView: View {
                 .foregroundStyle(Color.white)
                 .bold()
                 .disabled(input.isEmpty)
+                NavigationLink(
+                    destination: MainView(input: $input, arrayInput: $arrayInput),
+                    isActive: $navigateToMainView
+                ) {
+                    EmptyView()
+                }
             }
             .navigationBarBackButtonHidden(true)
         }
@@ -110,11 +121,20 @@ struct PopOverView: View {
 }
 
 struct PopOverView_Previews: PreviewProvider {
+    @State static var input: String = ""
+    @State static var arrayInput: [String] = []
+    @State static var showPopover: Bool = true
+    @State static var navigateToMainView: Bool = false
+    
     static var previews: some View {
-        
-        PopOverView(showPopover: .constant(true), input: .constant(""), navigateToMainView: .constant(false))
-            .previewLayout(.sizeThatFits)
-            .padding()
+        PopOverView(
+            input: $input,
+            arrayInput: $arrayInput,
+            showPopover: $showPopover,
+            navigateToMainView: $navigateToMainView
+        )
+        .previewLayout(.sizeThatFits)
+        .padding()
     }
 }
 

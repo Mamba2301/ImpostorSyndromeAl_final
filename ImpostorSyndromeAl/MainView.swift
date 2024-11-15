@@ -14,6 +14,7 @@ struct MainView: View {
     @State private var currentDate = Date()
     @State private var showPopover: Bool = false
     @Binding var input: String
+    @Binding var arrayInput: [String]
     
     private var months: [String] {
         let formatter = DateFormatter()
@@ -37,7 +38,7 @@ struct MainView: View {
         formatter.dateFormat = "dd MMMM"
         return formatter.string(from: currentDate)
     }
-
+    
     var body: some View {
         VStack {
             HStack {
@@ -63,34 +64,51 @@ struct MainView: View {
                 }
             }
             
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.pink, lineWidth: 2)
-                    .frame(width: 300, height: 80)
-                VStack(alignment: .leading) {
-                    Text(formattedDate)
-                        .bold()
-                    Text(input)
-                }
-                .padding(.trailing, 150)
-            }
-            
-            Spacer()
-            
-            HStack {
-                Button("Add Thoughts", systemImage: "plus.circle.fill") {
-                    showPopover.toggle()
-                }
-                .foregroundStyle(.pink)
-                .font(.system(size: 20))
-                .popover(isPresented: $showPopover) {
-                    PopOverView(showPopover: $showPopover, input: $input, navigateToMainView: .constant(true))
+            List {
+                ForEach(arrayInput, id: \.self) { thought in
+                    VStack(alignment: .leading) {
+                        Text("\(currentMonthName) \(currentYear)")
+                            .font(.headline)
+                        Text(thought)
+                        Divider()
+                        HStack {
+                            Text("\(currentMonthName) \(currentYear)")
+                            Spacer()
+                            Button("", systemImage: "ellipsis") {
+                                
+                        }
+                    }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.leading, 40)
-            .navigationBarBackButtonHidden(true)
         }
+        
+        Spacer()
+        
+        HStack {
+            Button("Add Thoughts", systemImage: "plus.circle.fill") {
+                showPopover.toggle()
+            }
+            .foregroundStyle(.pink)
+            .font(.system(size: 20))
+            .popover(isPresented: $showPopover) {
+                PopOverView(
+                    input: $input,
+                    arrayInput: $arrayInput,
+                    showPopover: $showPopover,
+                    navigateToMainView: .constant(true)
+                )
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 40)
+        .navigationBarBackButtonHidden(true)
+    }
         .padding(.top, 20)
+}
+}
+
+struct MainView_Previews: PreviewProvider {
+    static var previews: some View {
+        MainView(input: .constant(""), arrayInput: .constant([]))
     }
 }

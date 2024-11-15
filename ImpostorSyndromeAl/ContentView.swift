@@ -12,8 +12,9 @@ struct ContentView: View {
     
     @State private var currentDate = Date() 
     @State private var showPopover: Bool = false
-    @State private var inputText: String = ""
+    @State private var input: String = ""
     @State private var navigateToMainView: Bool = false
+    @State private var arrayInput: [String] = []
     
     private var months: [String] {
         let formatter = DateFormatter()
@@ -73,7 +74,12 @@ struct ContentView: View {
                     .foregroundStyle(.pink)
                     .font(.system(size: 20))
                     .popover(isPresented: $showPopover) {
-                        PopOverView(showPopover: $showPopover, input: $inputText, navigateToMainView: $navigateToMainView)
+                        PopOverView(
+                            input: $input,
+                            arrayInput: $arrayInput,
+                            showPopover: $showPopover,
+                            navigateToMainView: $navigateToMainView
+                        )
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -81,7 +87,10 @@ struct ContentView: View {
             }
             .padding(.top, 20)
             .navigationDestination(isPresented: $navigateToMainView) {
-                MainView(input: $inputText)
+                MainView(
+                    input: $input,
+                    arrayInput: $arrayInput
+                )
             }
         }
     }
