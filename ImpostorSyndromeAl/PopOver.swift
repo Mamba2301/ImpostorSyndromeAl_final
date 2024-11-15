@@ -1,17 +1,10 @@
-//
-//  File.swift
-//  ImpostorSyndromeAl
-//
-//  Created by Alessandra Di Rosa on 13/11/24.
-//
 import SwiftUI
 
-// PopOverView
 struct PopOverView: View {
     @State private var rotateImage = false
-    
+    @State private var showSaveMode = false
     @Binding var input: String
-    @Binding var arrayInput: [String]
+    @Binding var arrayInput: [Thought]
     @Binding var showPopover: Bool
     @Binding var navigateToMainView: Bool
     
@@ -27,76 +20,93 @@ struct PopOverView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                HStack {
-            
-                    Text(formattedDate)
-                        .font(.title2)
-                        .bold()
-                        .padding(.leading)
-                    
-                    Spacer()
-                    
-                    Button("Cancel") {
-                        showPopover.toggle()
-                    }
-                    .foregroundStyle(Color.red)
-                    .padding(.trailing)
-                }
-                .padding(.top)
-                
-                Divider()
-                
-                
-                Image("Image")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 250, height: 250)
-                    .padding(.top, -8)
-                    .rotationEffect(.degrees(rotateImage ? -15 : 15))
-                    .offset(x: rotateImage ? 20 : -20)
-                    .animation(
-                        Animation.easeInOut(duration: 1)
-                            .repeatForever(autoreverses: true),
-                        value: rotateImage
-                    )
-                    .onAppear {
-                        
-                        rotateImage.toggle()
-                    }
-                
-                Text("WHAT'S ON YOUR MIND?")
+        VStack {
+            HStack {
+                Text(formattedDate)
+                    .font(.title2)
                     .bold()
-                    .font(.title)
-                    .padding(.top, 20)
-                
-                ZStack(alignment: .topLeading) {
-                    TextEditor(text: $input)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.pink, lineWidth: 2)
-                        )
-                        .foregroundColor(.secondary)
-                        .frame(width: 300, height: 200)
-                    
-                    if input.isEmpty {
-                        Text("Type here...")
-                            .foregroundColor(.secondary)
-                            .padding(.top, 25)
-                            .padding(.leading, 20)
-                    }
-                }
+                    .padding(.leading)
                 
                 Spacer()
                 
+                Button("Cancel") {
+                    showPopover.toggle()
+                }
+                .foregroundStyle(Color.red)
+                .padding(.trailing)
+            }
+            .padding(.top)
+            
+            Divider()
+            
+            ZStack {
+                if !showSaveMode {
+                    Image("Image")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 250, height: 250)
+                        .padding(.top, -8)
+                        .rotationEffect(.degrees(rotateImage ? -15 : 15))
+                        .offset(x: rotateImage ? 20 : -20)
+                        .animation(
+                            Animation.easeInOut(duration: 1)
+                                .repeatForever(autoreverses: true),
+                            value: rotateImage
+                        )
+                        .onAppear {
+                            rotateImage.toggle()
+                        }
+                }
+                
+                if showSaveMode {
+                    Image("Image2")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 250, height: 250)
+                        .padding(.top, -8)
+                        .rotationEffect(.degrees(rotateImage ? -15 : 15))
+                        .offset(x: rotateImage ? 20 : -20)
+                        .animation(
+                            Animation.easeInOut(duration: 1)
+                                .repeatForever(autoreverses: true),
+                            value: rotateImage
+                        )
+                        .onAppear {
+                            rotateImage.toggle()
+                        }
+                }
+            }
+            
+            Text("WHAT'S ON YOUR MIND?")
+                .bold()
+                .font(.title)
+                .padding(.top, 20)
+            
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $input)
+                    .autocapitalization(.none)  // Disabilita la capitalizzazione automatica
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.pink, lineWidth: 2)
+                    )
+                    .foregroundColor(.secondary)
+                    .frame(width: 300, height: 200)
+                
+                if input.isEmpty {
+                    Text("Type here...")
+                        .foregroundColor(.secondary)
+                        .padding(.top, 25)
+                        .padding(.leading, 20)
+                }
+            }
+            
+            Spacer()
+            
+            if !showSaveMode {
                 Button(action: {
                     if !input.isEmpty {
-                        arrayInput.append(input)
-                        input = ""
-                        showPopover.toggle()
-                        navigateToMainView = true
+                        showSaveMode = true
                     }
                 }) {
                     Text("Reframe")
@@ -108,21 +118,38 @@ struct PopOverView: View {
                 .foregroundStyle(Color.white)
                 .bold()
                 .disabled(input.isEmpty)
-                NavigationLink(
-                    destination: MainView(input: $input, arrayInput: $arrayInput),
-                    isActive: $navigateToMainView
-                ) {
-                    EmptyView()
+            }
+            else {
+                VStack {
+                    Button(action: {
+                        if !input.isEmpty {
+                            let newThought = Thought(text: input, date: Date())
+                            arrayInput.append(newThought)
+                            input = ""
+                            navigateToMainView = true
+                            showPopover.toggle()
+                        }
+                    }) {
+                        Text("Save")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.capsule)
+                    .controlSize(.large)
+                    .tint(.pink)
+                    .foregroundStyle(Color.white)
+                    .bold()
+                    .disabled(input.isEmpty)
                 }
             }
-            .navigationBarBackButtonHidden(true)
         }
+        .padding()
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 struct PopOverView_Previews: PreviewProvider {
     @State static var input: String = ""
-    @State static var arrayInput: [String] = []
+    @State static var arrayInput: [Thought] = []
     @State static var showPopover: Bool = true
     @State static var navigateToMainView: Bool = false
     
@@ -137,5 +164,4 @@ struct PopOverView_Previews: PreviewProvider {
         .padding()
     }
 }
-
 
